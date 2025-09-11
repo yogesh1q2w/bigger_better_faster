@@ -357,7 +357,6 @@ class DataEfficientAtariRunner(run_experiment.Runner):
         max_steps = np.inf if max_steps is None else max_steps
         step = 0
 
-        print("One to one = ", one_to_one, flush=True)
         # Keep interacting until we reach a terminal state.
         while True:
             b = 0
@@ -400,9 +399,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
                         + "Normalized Return: {}".format(np.round(human_norm_ret, 3)),
                         flush=True,
                     )
-                    print(cum_lengths, cum_rewards)
-                    # self._maybe_save_single_summary(self.num_steps + total_steps,
-                    #                                 cum_rewards[-1], cum_lengths[-1])
+                    self._maybe_save_single_summary(self.num_steps + total_steps, cum_rewards[-1], cum_lengths[-1])
 
                     if one_to_one:
                         new_obses = delete_ind_from_array(new_obses, b, axis=1)
@@ -427,7 +424,6 @@ class DataEfficientAtariRunner(run_experiment.Runner):
                 rewards = np.clip(rewards, -1, 1)
 
             self._agent.log_transition(new_obs, actions, rewards, terminals, episode_end)
-            # print(f"Logging the transition s, {actions}, {rewards}, {terminals}, {episode_end} in replay buffer")
 
             if (
                 not live_envs
@@ -531,23 +527,23 @@ class DataEfficientAtariRunner(run_experiment.Runner):
         """Runs one iteration of agent/environment interaction."""
         statistics = iteration_statistics.IterationStatistics()
         logging.info("Starting iteration %d", iteration)
-        # (
-        #     num_episodes_train,
-        #     average_reward_train,
-        #     average_steps_per_second,
-        #     norm_score_train,
-        # ) = self._run_train_phase(statistics)
+        (
+            num_episodes_train,
+            average_reward_train,
+            average_steps_per_second,
+            norm_score_train,
+        ) = self._run_train_phase(statistics)
         num_episodes_eval, average_reward_eval, human_norm_eval = self._run_eval_phase(statistics)
-        # self._save_tensorboard_summaries(
-        #     iteration,
-        #     num_episodes_train,
-        #     average_reward_train,
-        #     norm_score_train,
-        #     num_episodes_eval,
-        #     average_reward_eval,
-        #     human_norm_eval,
-        #     average_steps_per_second,
-        # )
+        self._save_tensorboard_summaries(
+            iteration,
+            num_episodes_train,
+            average_reward_train,
+            norm_score_train,
+            num_episodes_eval,
+            average_reward_eval,
+            human_norm_eval,
+            average_steps_per_second,
+        )
         return statistics.data_lists
 
     def _maybe_save_single_summary(self, iteration, ep_return, length, save_if_eval=False):

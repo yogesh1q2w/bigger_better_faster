@@ -1224,17 +1224,6 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
         # Create some dummy actions of arbitrary length to initialize the transition
         # model, if the network has one.
         actions = jnp.zeros((5,))
-
-        # print(
-        #     self.network_def.tabulate(
-        #         jax.random.PRNGKey(0),
-        #         x=self.state.astype(self.dtype),
-        #         actions=actions,
-        #         do_rollout=self.spr_weight > 0,
-        #         support=self._support,
-        #     )
-        # )
-        # exit(1)
         self.online_params = FrozenDict(
             self.network_def.init(
                 x=self.state.astype(self.dtype),
@@ -1363,10 +1352,6 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
                 batch_size=self._batch_size * self._batches_to_group,
                 update_horizon=self.update_horizon_scheduler(self.cycle_grad_steps),
                 gamma=self.gamma_scheduler(self.cycle_grad_steps),
-            )
-            print(
-                f"Cycle grad steps = {self.cycle_grad_steps}, gamma = {self.gamma_scheduler(self.cycle_grad_steps)}, n={self.update_horizon_scheduler(self.cycle_grad_steps)}, batches_to_group={self._batches_to_group}",
-                flush=True,
             )
             replay_elements = collections.OrderedDict()
             for element, element_type in zip(samples, types):
@@ -1773,9 +1758,6 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
                 terminal,
                 episode_end=episode_end,
             )
-            # print(
-            #     f"Logging the transition s, {action}, {reward}, {terminal}, {episode_end} in replay buffer", flush=True
-            # )
 
     def select_action(
         self,
@@ -1814,7 +1796,6 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
         if not self.eval_mode:
             self._train_step()
         state = self.state
-        # print("State sum = ", state.sum(), flush=True)
 
         use_target = self.target_action_selection
         select_params = self.target_network_params if use_target else self.online_params
