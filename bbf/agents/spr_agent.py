@@ -1617,10 +1617,10 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
             if self.dynamic_scale:
                 metrics["Dynamic Scale"] = self.dynamic_scale.scale
 
-            if self.summary_writer is not None:
-                with self.summary_writer.as_default():
-                    for k, v in metrics.items():
-                        tf.summary.scalar(k, v, step=self.training_steps)
+            # if self.summary_writer is not None:
+            #     with self.summary_writer.as_default():
+            #         for k, v in metrics.items():
+            #             tf.summary.scalar(k, v, step=self.training_steps)
             if self.verbose:
                 logging.info(str(metrics))
 

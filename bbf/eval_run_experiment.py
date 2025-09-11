@@ -600,6 +600,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             statistics = self._run_one_iteration(iteration)
             pickle.dump(self._agent.target_network_params, open(f"model_{self._agent.seed}_{iteration}", "wb"))
             self._log_experiment(iteration, statistics)
+            pickle.dump(statistics, open(f"stats_{self._agent.seed}_{iteration}", "wb"))
             self._checkpoint_experiment(iteration)
 
         # self._summary_writer.flush()
