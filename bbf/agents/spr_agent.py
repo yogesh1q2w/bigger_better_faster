@@ -1695,10 +1695,10 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
             if self.training_steps % self.update_period == 0:
                 for i in range(self._num_updates_per_train_step):
                     self._training_step_update(i, offline=False)
-                    print("successful grad step done", flush=True)
+                    # print("successful grad step done", flush=True)
         if self.reset_every > 0 and self.training_steps > self.next_reset:
             self.reset_weights()
-            print("successful reset step done", flush=True)
+            # print("successful reset step done", flush=True)
 
         self.training_steps += 1
 
