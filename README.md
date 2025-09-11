@@ -1,3 +1,4 @@
+# Copy of official code:
 # Bigger, Better, Faster: Human Level Atari with Human Level Efficiency
 
 This repository implements the Bigger, Better, Faster (BBF) agent in JAX, building
