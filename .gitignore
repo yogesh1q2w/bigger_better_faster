@@ -170,3 +170,5 @@ wandb/
 **.npy
 experiments/**/exp_output/*
 experiments/**/logs/*
+exp_output/**
+model_**

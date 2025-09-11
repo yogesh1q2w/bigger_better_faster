@@ -28,6 +28,7 @@ import gin
 import jax
 import numpy as np
 import tensorflow as tf
+import pickle
 
 
 atari_human_scores = {
@@ -276,20 +277,20 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             sum_returns += episode_return
             num_episodes += 1
             sys.stdout.flush()
-            if self._summary_writer is not None:
-                with self._summary_writer.as_default():
-                    _ = (
-                        tf.summary.scalar(
-                            "train_episode_returns",
-                            float(episode_return),
-                            step=self.num_steps,
-                        ),
-                    )
-                    _ = tf.summary.scalar(
-                        "train_episode_lengths",
-                        float(episode_length),
-                        step=self.num_steps,
-                    )
+            # if self._summary_writer is not None:
+            #     with self._summary_writer.as_default():
+            #         _ = (
+            #             tf.summary.scalar(
+            #                 "train_episode_returns",
+            #                 float(episode_return),
+            #                 step=self.num_steps,
+            #             ),
+            #         )
+            #         _ = tf.summary.scalar(
+            #             "train_episode_lengths",
+            #             float(episode_length),
+            #             step=self.num_steps,
+            #         )
         return step_count, sum_returns, num_episodes, state, envs
 
     def _initialize_episode(self, envs):
@@ -399,7 +400,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
                         + "Normalized Return: {}".format(np.round(human_norm_ret, 3)),
                         flush=True,
                     )
-                    self._maybe_save_single_summary(self.num_steps + total_steps, cum_rewards[-1], cum_lengths[-1])
+                    # self._maybe_save_single_summary(self.num_steps + total_steps, cum_rewards[-1], cum_lengths[-1])
 
                     if one_to_one:
                         new_obses = delete_ind_from_array(new_obses, b, axis=1)
@@ -534,58 +535,58 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             norm_score_train,
         ) = self._run_train_phase(statistics)
         num_episodes_eval, average_reward_eval, human_norm_eval = self._run_eval_phase(statistics)
-        self._save_tensorboard_summaries(
-            iteration,
-            num_episodes_train,
-            average_reward_train,
-            norm_score_train,
-            num_episodes_eval,
-            average_reward_eval,
-            human_norm_eval,
-            average_steps_per_second,
-        )
+        # self._save_tensorboard_summaries(
+        #     iteration,
+        #     num_episodes_train,
+        #     average_reward_train,
+        #     norm_score_train,
+        #     num_episodes_eval,
+        #     average_reward_eval,
+        #     human_norm_eval,
+        #     average_steps_per_second,
+        # )
         return statistics.data_lists
 
-    def _maybe_save_single_summary(self, iteration, ep_return, length, save_if_eval=False):
-        prefix = "Train/" if not self._agent.eval_mode else "Eval/"
-        if not self._agent.eval_mode or save_if_eval:
-            with self._summary_writer.as_default():
-                normalized_score = normalize_score(ep_return, self.game_name)
-                tf.summary.scalar(prefix + "EpisodeLength", length, step=iteration)
-                tf.summary.scalar(prefix + "EpisodeReturn", ep_return, step=iteration)
-                tf.summary.scalar(prefix + "EpisodeNormalizedScore", normalized_score, step=iteration)
+        # def _maybe_save_single_summary(self, iteration, ep_return, length, save_if_eval=False):
+        # prefix = "Train/" if not self._agent.eval_mode else "Eval/"
+        # if not self._agent.eval_mode or save_if_eval:
+        #     with self._summary_writer.as_default():
+        #         normalized_score = normalize_score(ep_return, self.game_name)
+        #         tf.summary.scalar(prefix + "EpisodeLength", length, step=iteration)
+        #         tf.summary.scalar(prefix + "EpisodeReturn", ep_return, step=iteration)
+        #         tf.summary.scalar(prefix + "EpisodeNormalizedScore", normalized_score, step=iteration)
 
-    def _save_tensorboard_summaries(
-        self,
-        iteration,
-        num_episodes_train,
-        average_reward_train,
-        norm_score_train,
-        num_episodes_eval,
-        average_reward_eval,
-        norm_score_eval,
-        average_steps_per_second,
-    ):
-        """Save statistics as tensorboard summaries.
+        # def _save_tensorboard_summaries(
+        #     self,
+        #     iteration,
+        #     num_episodes_train,
+        #     average_reward_train,
+        #     norm_score_train,
+        #     num_episodes_eval,
+        #     average_reward_eval,
+        #     norm_score_eval,
+        #     average_steps_per_second,
+        # ):
+        # """Save statistics as tensorboard summaries.
 
-        Args:
-          iteration: int, The current iteration number.
-          num_episodes_train: int, number of training episodes run.
-          average_reward_train: float, The average training reward.
-          norm_score_train: float, average training normalized score.
-          num_episodes_eval: int, number of evaluation episodes run.
-          average_reward_eval: float, The average evaluation reward.
-          norm_score_eval: float, average eval normalized score.
-          average_steps_per_second: float, The average number of steps per second.
-        """
-        with self._summary_writer.as_default():
-            tf.summary.scalar("Train/NumEpisodes", num_episodes_train, step=iteration)
-            tf.summary.scalar("Train/AverageReturns", average_reward_train, step=iteration)
-            tf.summary.scalar("Train/AverageNormalizedScore", norm_score_train, step=iteration)
-            tf.summary.scalar("Train/AverageStepsPerSecond", average_steps_per_second, step=iteration)
-            tf.summary.scalar("Eval/NumEpisodes", num_episodes_eval, step=iteration)
-            tf.summary.scalar("Eval/AverageReturns", average_reward_eval, step=iteration)
-            tf.summary.scalar("Eval/NormalizedScore", norm_score_eval, step=iteration)
+        # Args:
+        #   iteration: int, The current iteration number.
+        #   num_episodes_train: int, number of training episodes run.
+        #   average_reward_train: float, The average training reward.
+        #   norm_score_train: float, average training normalized score.
+        #   num_episodes_eval: int, number of evaluation episodes run.
+        #   average_reward_eval: float, The average evaluation reward.
+        #   norm_score_eval: float, average eval normalized score.
+        #   average_steps_per_second: float, The average number of steps per second.
+        # """
+        # with self._summary_writer.as_default():
+        #     tf.summary.scalar("Train/NumEpisodes", num_episodes_train, step=iteration)
+        #     tf.summary.scalar("Train/AverageReturns", average_reward_train, step=iteration)
+        #     tf.summary.scalar("Train/AverageNormalizedScore", norm_score_train, step=iteration)
+        #     tf.summary.scalar("Train/AverageStepsPerSecond", average_steps_per_second, step=iteration)
+        #     tf.summary.scalar("Eval/NumEpisodes", num_episodes_eval, step=iteration)
+        #     tf.summary.scalar("Eval/AverageReturns", average_reward_eval, step=iteration)
+        #     tf.summary.scalar("Eval/NormalizedScore", norm_score_eval, step=iteration)
 
     def run_experiment(self):
         """Runs a full experiment, spread over multiple iterations."""
@@ -594,11 +595,14 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             logging.warning("num_iterations (%d) < start_iteration(%d)", self._num_iterations, self._start_iteration)
             return
 
+        pickle.dump(self._agent.target_network_params, open(f"model_{self._agent.seed}_0", "wb"))
         for iteration in range(self._start_iteration, self._num_iterations):
             statistics = self._run_one_iteration(iteration)
+            pickle.dump(self._agent.target_network_params, open(f"model_{self._agent.seed}_{iteration}", "wb"))
             self._log_experiment(iteration, statistics)
             self._checkpoint_experiment(iteration)
-        self._summary_writer.flush()
+
+        # self._summary_writer.flush()
 
 
 @gin.configurable

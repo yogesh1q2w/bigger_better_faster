@@ -40,8 +40,8 @@ import jax.profiler
 import numpy as np
 import tensorflow.compat.v2 as tf
 
-from bigger_better_faster.bbf import eval_run_experiment
-from bigger_better_faster.bbf.agents import spr_agent
+from bbf import eval_run_experiment
+from bbf.agents import spr_agent
 
 FLAGS = flags.FLAGS
 CONFIGS_DIR = "./configs"
@@ -60,7 +60,7 @@ AGENTS = [
 flags.DEFINE_enum("agent", "SPR", AGENTS, "Name of the agent.")
 flags.DEFINE_integer("run_number", 1, "Run number.")
 flags.DEFINE_integer("agent_seed", None, "If None, use the run_number.")
-flags.DEFINE_boolean("no_seeding", True, "If True, choose a seed at random.")
+flags.DEFINE_boolean("no_seeding", False, "If True, choose a seed at random.")
 flags.DEFINE_string(
     "load_replay_dir",
     None,
