@@ -41,9 +41,9 @@ class AtariEnv:
         self.env.reset()
 
         self.n_steps = 0
-        self.n_lives = self.environment.ale.lives()
+        self.n_lives = self.env.ale.lives()
 
-        self.environment.ale.getScreenGrayscale(self.screen_buffer[0])
+        self.env.ale.getScreenGrayscale(self.screen_buffer[0])
         self.screen_buffer[1].fill(0)
 
         self.state_ = np.zeros((self.state_height, self.state_width, self.n_stacked_frames), dtype=np.uint8)
@@ -65,7 +65,7 @@ class AtariEnv:
             _, reward_, game_over, _ = self.env.step(action)
 
             # we terminate in RB on loss of life but end episode on game_over
-            n_lives_new = self.environment.ale.lives()
+            n_lives_new = self.env.ale.lives()
             terminal = game_over or (n_lives_new < self.n_lives)
             self.n_lives = n_lives_new
 
@@ -76,7 +76,7 @@ class AtariEnv:
                 break
 
             if idx_frame >= self.n_skipped_frames - 2:
-                self.environment.ale.getScreenGrayscale(self.screen_buffer[idx_frame - (self.n_skipped_frames - 2)])
+                self.env.ale.getScreenGrayscale(self.screen_buffer[idx_frame - (self.n_skipped_frames - 2)])
 
         self.state_ = np.roll(self.state_, -1, axis=-1)
         self.state_[:, :, -1] = self.pool_and_resize()
