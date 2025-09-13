@@ -639,12 +639,15 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             logging.warning("num_iterations (%d) < start_iteration(%d)", self._num_iterations, self._start_iteration)
             return
 
-        pickle.dump(self._agent.target_network_params, open(f"model_{self._agent.seed}_0", "wb"))
+        os.makedirs(f"logs_and_models/O_{self.game_name_full}")
         for iteration in range(self._start_iteration, self._num_iterations):
             statistics = self._run_one_iteration(iteration)
-            pickle.dump(self._agent.target_network_params, open(f"model_{self._agent.seed}_{iteration}", "wb"))
+            pickle.dump(
+                self._agent.target_network_params,
+                open(f"logs_and_models/O_{self.game_name_full}/model_{self._agent.seed}", "wb"),
+            )
             self._log_experiment(iteration, statistics)
-            pickle.dump(statistics, open(f"stats_{self._agent.seed}_{iteration}", "wb"))
+            pickle.dump(statistics, open(f"logs_and_models/O_{self.game_name_full}/stats_{self._agent.seed}", "wb"))
             self._checkpoint_experiment(iteration)
 
         # self._summary_writer.flush()
