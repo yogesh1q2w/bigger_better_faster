@@ -222,7 +222,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
 
         self.wandb_api = wandb.init(
             project="slimbbf",
-            config=config_json,
+            config=config_json.update({"game_name": game_name, "algo_name": "bbf"}),
             name=str(self._agent.seed),
             group=f"bbf_O_{game_name}",
             mode="online",
