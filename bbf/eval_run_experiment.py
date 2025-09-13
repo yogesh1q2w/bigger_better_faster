@@ -21,7 +21,7 @@ import sys
 import time
 import wandb
 
-from bbf.eval.run_eval import run
+from bbf.eval.run_eval import run_evaluation
 
 from absl import logging
 from dopamine.discrete_domains import atari_lib
@@ -458,8 +458,8 @@ class DataEfficientAtariRunner(run_experiment.Runner):
                 break
 
         state = (new_obses, rewards, terminals, episode_end, cum_rewards, cum_lengths)
-        if self.total_steps % 20_000 and total_steps < 100_000:
-            eval_episode_returns, eval_episode_lengths = run(
+        if self.total_steps % 20_000 == 0 and total_steps < 100_000:
+            eval_episode_returns, eval_episode_lengths = run_evaluation(
                 self.game_name_full, jax.random.PRNGKey(0), self._agent.target_network_params
             )
             self.wandb_api.log(

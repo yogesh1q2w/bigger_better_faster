@@ -2,9 +2,8 @@
 The environment is inspired from https://github.com/google/dopamine/blob/master/dopamine/discrete_domains/atari_lib.py
 """
 
-import ale_py
 from typing import Tuple
-import gymnasium as gym
+import gym
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -18,15 +17,7 @@ class AtariEnv:
         self.n_stacked_frames = 4
         self.n_skipped_frames = 4
 
-        gym.register_envs(ale_py)  # To use ale with gym which speeds up step()
-        self.env = gym.make(
-            f"ALE/{self.name}-v5",
-            full_action_space=False,
-            frameskip=1,
-            repeat_action_probability=0.25 if sticky_actions else 0.0,
-            max_num_frames_per_episode=108_000,
-            obs_type="grayscale",
-        ).env
+        self.env = gym.make("{}NoFrameskip-v4".format(name)).env
 
         self.n_actions = self.env.action_space.n
         self.original_state_height, self.original_state_width = self.env.observation_space._shape
@@ -68,7 +59,7 @@ class AtariEnv:
         reward = 0
 
         for idx_frame in range(self.n_skipped_frames):
-            obs_, reward_, game_over, _, info_ = self.env.step(action)
+            obs_, reward_, game_over, info_ = self.env.step(action)
 
             # we terminate in RB on loss of life but end episode on game_over
             terminal = game_over or (info_["lives"] < self.n_lives)

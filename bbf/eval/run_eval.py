@@ -7,7 +7,7 @@ from bbf.eval.utils import select_action_eval
 from bbf.eval.bbf import BBF
 
 
-def run(game, key, bbf_wts):
+def run_evaluation(game, key, bbf_wts):
 
     bbf_wts = unfreeze(bbf_wts)
 
