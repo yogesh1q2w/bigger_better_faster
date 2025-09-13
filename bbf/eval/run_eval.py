@@ -60,5 +60,8 @@ def evaluate(key: jax.Array, agent, game_name):
             episode_returns[-1] += reward
             episode_lengths[-1] += 1 - game_over
         del env
-
+    print(
+        f"Eval complete with returns {episode_returns}, Mean return = {np.mean(episode_returns)}, and lengths {episode_lengths}",
+        flush=True,
+    )
     return episode_returns, episode_lengths
