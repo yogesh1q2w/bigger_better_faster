@@ -39,6 +39,7 @@ import gin
 import jax.profiler
 import numpy as np
 import tensorflow.compat.v2 as tf
+import multiprocessing as mp
 
 from bbf import eval_run_experiment
 from bbf.agents import spr_agent
@@ -241,5 +242,6 @@ def main(unused_argv):
 
 
 if __name__ == "__main__":
+    mp.set_start_method("spawn", force=True)
     flags.mark_flag_as_required("base_dir")
     app.run(main)
