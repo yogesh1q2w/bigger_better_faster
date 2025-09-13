@@ -379,6 +379,17 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             episode_end.fill(0)
             total_steps += len(live_envs)
             actions = self._agent.step()
+            if self.total_steps % 20_000 == 0 and total_steps < 100_000 and not one_to_one:
+                eval_episode_returns, eval_episode_lengths = run_evaluation(
+                    self.game_name_full, jax.random.PRNGKey(0), self._agent.target_network_params
+                )
+                self.wandb_api.log(
+                    {
+                        "n_sampling_steps": self.total_steps,
+                        "performances/eval_avg_return": np.mean(eval_episode_returns),
+                        "performances/eval_avg_length": np.mean(eval_episode_lengths),
+                    }
+                )
 
             # The agent may be hanging on to the previous new_obs, so we don't
             # want to change it yet.
@@ -457,18 +468,15 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             ):
                 break
 
-        state = (new_obses, rewards, terminals, episode_end, cum_rewards, cum_lengths)
-        if self.total_steps % 20_000 == 0 and total_steps < 100_000:
-            eval_episode_returns, eval_episode_lengths = run_evaluation(
-                self.game_name_full, jax.random.PRNGKey(0), self._agent.target_network_params
-            )
+        if one_to_one:
             self.wandb_api.log(
                 {
-                    "n_sampling_steps": self.total_steps,
-                    "performances/eval_avg_return": np.mean(eval_episode_returns),
-                    "performances/eval_avg_length": np.mean(eval_episode_lengths),
+                    "n_sampling_steps": 100_000,
+                    "performances/eval_avg_return": np.mean(cum_rewards),
+                    "performances/eval_avg_length": np.mean(cum_lengths),
                 }
             )
+        state = (new_obses, rewards, terminals, episode_end, cum_rewards, cum_lengths)
         return cum_lengths, cum_rewards, state, envs
 
     def _run_train_phase(self, statistics):

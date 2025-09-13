@@ -1571,10 +1571,10 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
             indices = onp.reshape(onp.asarray(indices), (-1,))
             dqn_loss = onp.reshape(onp.asarray(aux_losses["DQNLoss"]), (-1))
             spr_loss = onp.reshape(onp.asarray(aux_losses["SPRLoss"]), (-1))
-            self.wandb_logs["train/td_loss"] += (1 - self.target_update_tau) * self.wandb_logs[
+            self.wandb_logs["train/td_loss"] = (1 - self.target_update_tau) * self.wandb_logs[
                 "train/td_loss"
             ] + self.target_update_tau * dqn_loss.mean()
-            self.wandb_logs["train/spr_loss"] += (1 - self.target_update_tau) * self.wandb_logs[
+            self.wandb_logs["train/spr_loss"] = (1 - self.target_update_tau) * self.wandb_logs[
                 "train/spr_loss"
             ] + self.target_update_tau * spr_loss.mean()
             priorities = onp.sqrt(dqn_loss + 1e-10)
