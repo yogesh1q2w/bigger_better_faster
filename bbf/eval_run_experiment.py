@@ -380,13 +380,13 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             episode_end.fill(0)
             total_steps += len(live_envs)
             actions = self._agent.step()
-            if self.total_steps % 20_000 == 0 and total_steps < 100_000 and not one_to_one:
+            if total_steps % 20_000 == 0 and total_steps < 100_000 and not one_to_one:
                 eval_episode_returns, eval_episode_lengths = run_evaluation(
                     self.game_name_full, jax.random.PRNGKey(0), self._agent.target_network_params
                 )
                 self.wandb_api.log(
                     {
-                        "n_sampling_steps": self.total_steps,
+                        "n_sampling_steps": total_steps,
                         "performances/eval_avg_return": np.mean(eval_episode_returns),
                         "performances/eval_avg_length": np.mean(eval_episode_lengths),
                     }
