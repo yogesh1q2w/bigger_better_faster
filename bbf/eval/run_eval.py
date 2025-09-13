@@ -1,7 +1,7 @@
 import jax
 import numpy as np
 
-from bbf.eval.atari_eval import AtariEval
+from bbf.eval.atari_eval import AtariEnv
 from bbf.eval.utils import select_action_eval
 from bbf.eval.bbf import BBF
 
@@ -21,35 +21,41 @@ def run(game, key, bbf_wts):
     )
 
     q_key, key = jax.random.split(key)
-    env = AtariEval(game, False, 1)
+    env = AtariEnv(game, False)
     agent = BBF(q_key, (84, 84, 4), env.n_actions, 51, [64, 128, 128, 2048])
     agent.target_params = bbf_wts
     del env
 
-    env_eval = lambda x: AtariEval(game, False, x)
-    episode_returns, episode_lengths = evaluate(key, {"horizon": 27_000}, agent, env_eval(10))  # run for 10 envs
+    episode_returns, episode_lengths = evaluate(key, agent, game)  # run for 10 envs
     return episode_returns, episode_lengths
 
 
-def evaluate(key: jax.Array, p: dict, agent, env):
-    key, reset_key = jax.random.split(key)
-    env.reset_with_noop(reset_key)
-    episode_termination = env.game_over_mask  # needed for considering rewards,length until env.game_over_mask
-    episode_returns = np.zeros(env.n_envs)
-    episode_lengths = np.zeros(env.n_envs)
+def evaluate(key: jax.Array, agent, game_name):
     epsilon_fn = lambda _: 0.001
 
-    while not episode_termination.all() and env.n_steps < p["horizon"]:
-        key, actions_key = jax.random.split(key)
+    episode_returns = []
+    episode_lengths = []
 
-        actions = select_action_eval(
-            agent.best_action, agent.target_params, env.states, actions_key, env.n_actions, epsilon_fn
-        )
-        rewards = env.step(np.array(actions))
+    for _ in range(10):
+        episode_returns.append(0)
+        episode_lengths.append(0)
 
-        # episode.termination changes here, so we use episode_termination
-        episode_returns += rewards * (1 - episode_termination)
-        episode_lengths += 1 - episode_termination
-        episode_termination = env.game_over_mask
+        env = AtariEnv(game_name, False)
+        reset_key, key = jax.random.split(key)
+        env.reset_with_noop(reset_key)
+        game_over = False
 
-    return episode_returns.tolist(), episode_lengths.tolist()
+        while not game_over and env.n_steps < 27_000:
+            key, action_key = jax.random.split(key)
+
+            action = select_action_eval(
+                agent.best_action, agent.target_params, np.array([env.state]), action_key, env.n_actions, epsilon_fn
+            )
+            reward, _, game_over = env.step(action[0])
+
+            # episode.termination changes here, so we use episode_termination
+            episode_returns[-1] += reward
+            episode_lengths[-1] += 1 - game_over
+        del env
+
+    return episode_returns, episode_lengths
