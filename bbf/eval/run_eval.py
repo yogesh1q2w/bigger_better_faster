@@ -1,5 +1,6 @@
 import jax
 import numpy as np
+from flax.core.frozen_dict import unfreeze
 
 from bbf.eval.atari_eval import AtariEnv
 from bbf.eval.utils import select_action_eval
@@ -7,6 +8,8 @@ from bbf.eval.bbf import BBF
 
 
 def run(game, key, bbf_wts):
+
+    bbf_wts = unfreeze(bbf_wts)
 
     for i in range(3):
         bbf_wts["params"]["encoder"][f"Stack_{i}"] = bbf_wts["params"]["encoder"].pop(f"ResidualStage_{i}")
