@@ -35,12 +35,12 @@ class AtariEnv:
         return jnp.array(self.state_, dtype=jnp.float32)
 
     def reset(self) -> None:
-        obs_, info_ = self.env.reset()
+        self.env.reset()
 
         self.n_steps = 0
-        self.n_lives = info_["lives"]  # to terminate on loss life
+        self.n_lives = self.environment.ale.lives()
 
-        self.screen_buffer[0] = obs_
+        self.environment.ale.getScreenGrayscale(self.screen_buffer[0])
         self.screen_buffer[1].fill(0)
 
         self.state_ = np.zeros((self.state_height, self.state_width, self.n_stacked_frames), dtype=np.uint8)
@@ -59,11 +59,12 @@ class AtariEnv:
         reward = 0
 
         for idx_frame in range(self.n_skipped_frames):
-            obs_, reward_, game_over, info_ = self.env.step(action)
+            _, reward_, game_over, _ = self.env.step(action)
 
             # we terminate in RB on loss of life but end episode on game_over
-            terminal = game_over or (info_["lives"] < self.n_lives)
-            self.n_lives = info_["lives"]
+            n_lives_new = self.environment.ale.lives()
+            terminal = game_over or (n_lives_new < self.n_lives)
+            self.n_lives = n_lives_new
 
             reward += reward_
 
@@ -72,7 +73,7 @@ class AtariEnv:
                 break
 
             if idx_frame >= self.n_skipped_frames - 2:
-                self.screen_buffer[idx_frame - (self.n_skipped_frames - 2)] = obs_
+                self.environment.ale.getScreenGrayscale(self.screen_buffer[idx_frame - (self.n_skipped_frames - 2)])
 
         self.state_ = np.roll(self.state_, -1, axis=-1)
         self.state_[:, :, -1] = self.pool_and_resize()
