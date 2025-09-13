@@ -5,9 +5,9 @@ import multiprocessing as mp
 
 mp.set_start_method("spawn", force=True)
 
-from eval.atari_eval import AtariEval
-from eval.utils import select_action_eval
-from eval.bbf import BBF
+from bbf.eval.atari_eval import AtariEval
+from bbf.eval.utils import select_action_eval
+from bbf.eval.bbf import BBF
 
 
 def run(game, key, bbf_wts):

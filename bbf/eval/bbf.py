@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 from flax.core import FrozenDict
 
-from eval.bbf_arch import BBFNet
+from bbf.eval.bbf_arch import BBFNet
 
 
 class BBF:
