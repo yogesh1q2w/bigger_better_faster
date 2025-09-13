@@ -220,7 +220,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
         self.game_name = game_name.lower().replace("_", "").replace(" ", "")
         self.game_name_full = game_name
 
-        config_json.update({"game_name": game_name, "algo_name": "bbf"})
+        config_json.update({"game_name": game_name, "algo_name": "bbf", "experiment_name": f"O_{game_name}"})
         self.wandb_api = wandb.init(
             project="slimbbf",
             config=config_json,
@@ -426,16 +426,16 @@ class DataEfficientAtariRunner(run_experiment.Runner):
                         + "Normalized Return: {}".format(np.round(human_norm_ret, 3)),
                         flush=True,
                     )
-
-                    self.wandb_api.log(
-                        {
-                            "n_sampling_steps": total_steps,
-                            "performances/train_episode_return": cum_rewards[-1],
-                            "performances/train_episode_length": cum_lengths[-1],
-                            "train/td_loss": self._agent.wandb_logs["train/td_loss"],
-                            "train/spr_loss": self._agent.wandb_logs["train/spr_loss"],
-                        }
-                    )
+                    if not one_to_one:
+                        self.wandb_api.log(
+                            {
+                                "n_sampling_steps": total_steps,
+                                "performances/train_episode_return": cum_rewards[-1],
+                                "performances/train_episode_length": cum_lengths[-1],
+                                "train/td_loss": self._agent.wandb_logs["train/td_loss"],
+                                "train/spr_loss": self._agent.wandb_logs["train/spr_loss"],
+                            }
+                        )
                     # self._maybe_save_single_summary(self.num_steps + total_steps, cum_rewards[-1], cum_lengths[-1])
 
                     if one_to_one:
