@@ -20,7 +20,10 @@ class AtariEnv:
         self.env = gym.make("{}NoFrameskip-v4".format(name)).env
 
         self.n_actions = self.env.action_space.n
-        self.original_state_height, self.original_state_width = self.env.observation_space._shape
+        self.original_state_height, self.original_state_width = (
+            self.env.observation_space._shape[0],
+            self.env.observation_space._shape[1],
+        )
         self.screen_buffer = [
             np.empty((self.original_state_height, self.original_state_width), dtype=np.uint8),
             np.empty((self.original_state_height, self.original_state_width), dtype=np.uint8),
