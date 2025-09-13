@@ -221,7 +221,7 @@ def main(unused_argv):
     set_random_seed(seed)
     run_experiment.load_gin_configs(gin_files, gin_bindings)
 
-    write_config(base_dir, seed, FLAGS.tag, FLAGS.agent)
+    config_json = write_config(base_dir, seed, FLAGS.tag, FLAGS.agent)
 
     # Set the Jax agent seed
     create_agent_fn = functools.partial(create_agent, seed=seed, data_logging=FLAGS.data_logging)
@@ -230,7 +230,7 @@ def main(unused_argv):
         runner_fn = eval_run_experiment.DataEfficientAtariRunner
         logging.info("Using MaxEpisodeEvalRunner for evaluation.")
         kwargs = {}  # No additional flags should be passed.
-        runner = runner_fn(base_dir, create_agent_fn, **kwargs)
+        runner = runner_fn(base_dir, create_agent_fn, config_json=config_json, **kwargs)
     else:
         runner = run_experiment.Runner(base_dir, create_agent_fn)
 

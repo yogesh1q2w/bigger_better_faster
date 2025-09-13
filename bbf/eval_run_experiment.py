@@ -19,6 +19,9 @@ import functools
 import os
 import sys
 import time
+import wandb
+
+from bbf.eval.run_eval import run
 
 from absl import logging
 from dopamine.discrete_domains import atari_lib
@@ -188,6 +191,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
         num_eval_envs=100,
         num_train_envs=4,
         eval_one_to_one=True,
+        config_json=None,
     ):
         """Specify the number of evaluation episodes."""
         create_environment_fn = functools.partial(create_environment_fn, game_name=game_name)
@@ -214,6 +218,16 @@ class DataEfficientAtariRunner(run_experiment.Runner):
         self._agent.reset_all(self._initialize_episode(self.train_envs))
         self._agent.cache_train_state()
         self.game_name = game_name.lower().replace("_", "").replace(" ", "")
+        self.game_name_full = game_name
+
+        self.wandb_api = wandb.init(
+            project="slimbbf",
+            config=config_json,
+            name=self._agent.seed,
+            group=f"bbf_O_{game_name}",
+            mode="online",
+            settings=wandb.Settings(_disable_stats=True),
+        )
 
     def _run_one_phase(
         self,
@@ -400,6 +414,16 @@ class DataEfficientAtariRunner(run_experiment.Runner):
                         + "Normalized Return: {}".format(np.round(human_norm_ret, 3)),
                         flush=True,
                     )
+
+                    self.wandb_api.log(
+                        {
+                            "n_sampling_steps": total_steps,
+                            "performances/train_episode_return": cum_rewards[-1],
+                            "performances/train_episode_length": cum_lengths[-1],
+                            "train/td_loss": self._agent.wandb_logs["train/td_loss"],
+                            "train/spr_loss": self._agent.wandb_logs["train/spr_loss"],
+                        }
+                    )
                     # self._maybe_save_single_summary(self.num_steps + total_steps, cum_rewards[-1], cum_lengths[-1])
 
                     if one_to_one:
@@ -434,6 +458,17 @@ class DataEfficientAtariRunner(run_experiment.Runner):
                 break
 
         state = (new_obses, rewards, terminals, episode_end, cum_rewards, cum_lengths)
+        if self.total_steps % 20_000 and total_steps < 100_000:
+            eval_episode_returns, eval_episode_lengths = run(
+                self.game_name_full, jax.random.PRNGKey(0), self._agent.target_network_params
+            )
+            self.wandb_api.log(
+                {
+                    "n_sampling_steps": self.total_steps,
+                    "performances/eval_avg_return": np.mean(eval_episode_returns),
+                    "performances/eval_avg_length": np.mean(eval_episode_lengths),
+                }
+            )
         return cum_lengths, cum_rewards, state, envs
 
     def _run_train_phase(self, statistics):
