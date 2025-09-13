@@ -380,7 +380,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             episode_end.fill(0)
             total_steps += len(live_envs)
             actions = self._agent.step()
-            if total_steps % 20_000 == 0 and total_steps < 100_000 and not one_to_one:
+            if step % 20_000 == 0 and step < 100_000 and not one_to_one:
                 eval_episode_returns, eval_episode_lengths = run_evaluation(
                     self.game_name_full, jax.random.PRNGKey(0), self._agent.target_network_params
                 )
