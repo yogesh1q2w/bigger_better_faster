@@ -220,9 +220,10 @@ class DataEfficientAtariRunner(run_experiment.Runner):
         self.game_name = game_name.lower().replace("_", "").replace(" ", "")
         self.game_name_full = game_name
 
+        config_json.update({"game_name": game_name, "algo_name": "bbf"})
         self.wandb_api = wandb.init(
             project="slimbbf",
-            config=config_json.update({"game_name": game_name, "algo_name": "bbf"}),
+            config=config_json,
             name=str(self._agent.seed),
             group=f"bbf_O_{game_name}",
             mode="online",
