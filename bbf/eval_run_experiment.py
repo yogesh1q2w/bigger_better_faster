@@ -639,7 +639,7 @@ class DataEfficientAtariRunner(run_experiment.Runner):
             logging.warning("num_iterations (%d) < start_iteration(%d)", self._num_iterations, self._start_iteration)
             return
 
-        os.makedirs(f"logs_and_models/O_{self.game_name_full}")
+        os.makedirs(f"logs_and_models/O_{self.game_name_full}", exist_ok=True)
         for iteration in range(self._start_iteration, self._num_iterations):
             statistics = self._run_one_iteration(iteration)
             pickle.dump(
